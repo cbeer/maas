@@ -1,0 +1,24 @@
+<h1>Editing Workspace</h1>
+
+<%= render 'form', workspace: @workspace %>
+
+<%= link_to 'Show', @workspace %> |
+<%= link_to 'Back', workspaces_path %>
+
+<div id="mirador" style="position: relative; width: 600px; height: 600px;"></div>
+
+<script>
+  var miradorInstance = Mirador.viewer({
+    id: 'mirador' // id selector where Mirador should be instantiated
+  });
+
+  var config = JSON.parse(document.querySelector('#workspace_content').value || "{}");
+  var overwriteMerge = (destinationArray, sourceArray, options) => sourceArray;
+  config.config = deepmerge(miradorInstance.store.getState().config, config.config, { arrayMerge: overwriteMerge });
+
+  miradorInstance.store.dispatch(miradorInstance.actions.importMiradorState(config));
+  miradorInstance.store.subscribe(function() {
+    var state = miradorInstance.store.getState();
+    document.querySelector('#workspace_content').value = JSON.stringify(state);
+  });
+</script>

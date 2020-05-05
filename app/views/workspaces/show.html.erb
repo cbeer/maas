@@ -1,0 +1,37 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Title:</strong>
+  <%= @workspace.title %>
+</p>
+
+<p>
+  <strong>Content:</strong>
+  <pre id="mirador-state"><%= @workspace.content %></pre>
+</p>
+
+<p>
+  <strong>Published:</strong>
+  <%= @workspace.published %>
+</p>
+
+<%= link_to 'Edit', edit_workspace_path(@workspace) %> |
+<%= link_to 'Back', workspaces_path %>
+
+<div id="mirador" style="position: relative; width: 600px; height: 600px;"></div>
+
+<script>
+  var miradorInstance = Mirador.viewer({
+    id: 'mirador' // id selector where Mirador should be instantiated
+  },
+    [
+      MiradorActionCableComponentPlugin,
+    ]
+  );
+
+  var config = JSON.parse(document.querySelector('#mirador-state').innerText || "{}");
+  var overwriteMerge = (destinationArray, sourceArray, options) => sourceArray;
+  config.config = deepmerge(miradorInstance.store.getState().config, config.config, { arrayMerge: overwriteMerge });
+
+  miradorInstance.store.dispatch(miradorInstance.actions.importMiradorState(config));
+</script>
