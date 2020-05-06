@@ -7,24 +7,33 @@ const session_token = uuidv4();
 
 class MiradorActionCableComponent extends React.Component {
   handleReceivedMessage = response => {
+    const { workspaceId } = this.props;
+
     console.log("received:");
     console.log(response);
 
     const { dispatch } = this.props;
-    if (response.from != session_token) {
+    if (response.workspaceId == workspaceId && response.from != session_token) {
       dispatch(response);
     }
   }
 
+  componentDidMount() {
+    const { channel, workspaceId } = this.props;
+
+    channel.follow(workspaceId, this.handleReceivedMessage);
+  }
+
+  componentWillUnmount() {
+    const { channel } = this.props;
+    channel.unfollow(workspaceId);
+  }
+
   render () {
+    const { channel } = this.props;
+
     return (
-      <ActionCableProvider url="ws://127.0.0.1:3000/cable">
-        <ActionCableConsumer
-          channel={{ channel: 'MiradorStateChannel' }}
-          onReceived={this.handleReceivedMessage}
-          />
-        <this.props.TargetComponent {...this.props} />
-      </ActionCableProvider>
+      <this.props.TargetComponent {...this.props} />
     );
   }
 }
@@ -32,10 +41,10 @@ class MiradorActionCableComponent extends React.Component {
 const initialState = {};
 
 const pluginStateReducer = (state = initialState, action) => {
-  console.log("sent:");
-  console.log(action);
   if (!action.from) {
-    // switch (action['type']) {
+    switch (action['type']) {
+      case 'mirador/IMPORT_MIRADOR_STATE':
+        return { ...state, ...action.state.channels }
     //   case 'mirador/ADD_WINDOW':
     //   case 'mirador/REQUEST_ANNOTATION':
     //   // case 'mirador/REQUEST_INFO_RESPONSE':
@@ -43,8 +52,9 @@ const pluginStateReducer = (state = initialState, action) => {
     //   case 'mirador/REQUEST_MANIFEST':
     //   case 'mirador/UPDATE_WORKSPACE_MOSAIC_LAYOUT':
     //   case 'mirador/REMOVE_WINDOW':
-        MiradorStateChannel.send({ ...action, from: session_token});
-    // }
+      default:
+        if (state.workspaceId) MiradorStateChannel.broadcast({ ...action, workspaceId: state.workspaceId, from: session_token});
+    }
   }
   return state;
 }
@@ -53,14 +63,20 @@ const mapDispatchToProps = (dispatch) => ({
   dispatch: dispatch,
 });
 
+const mapStateToProps = (state) => ({
+  channel: MiradorStateChannel,
+  workspaceId: state.channels.workspaceId,
+});
+
 const plugin = {
-    target: 'BackgroundPluginArea',
-    mode: 'wrap',
-    component: MiradorActionCableComponent,
-    mapDispatchToProps: mapDispatchToProps,
-    reducers: {
-       pluginState: pluginStateReducer,
-    },
+  target: 'BackgroundPluginArea',
+  mode: 'wrap',
+  component: MiradorActionCableComponent,
+  mapDispatchToProps: mapDispatchToProps,
+  mapStateToProps: mapStateToProps,
+  reducers: {
+     channels: pluginStateReducer,
+  },
 };
 
 export default plugin;

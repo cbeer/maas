@@ -25,3 +25,6 @@ var ReactRailsUJS = require("react_ujs");
 ReactRailsUJS.useContext(componentRequireContext);
 import miradorActionCableComponentPlugin from "components/MiradorActionCableComponentPlugin";
 window.MiradorActionCableComponentPlugin = miradorActionCableComponentPlugin;
+
+import MiradorStateChannel from "channels/mirador_state_channel";
+window.MiradorStateChannel = MiradorStateChannel;

@@ -6,7 +6,6 @@
   <thead>
     <tr>
       <th>Title</th>
-      <th>Content</th>
       <th>Published</th>
       <th colspan="3"></th>
     </tr>
@@ -16,7 +15,6 @@
     <% @workspaces.each do |workspace| %>
       <tr>
         <td><%= workspace.title %></td>
-        <td><%= workspace.content %></td>
         <td><%= workspace.published %></td>
         <td><%= link_to 'Show', workspace %></td>
         <td><%= link_to 'Edit', edit_workspace_path(workspace) %></td>

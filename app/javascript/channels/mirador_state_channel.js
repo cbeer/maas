@@ -10,8 +10,26 @@ const MiradorStateChannel = consumer.subscriptions.create("MiradorStateChannel",
   },
 
   received(data) {
+    console.log("received:");
+    console.log(data);
+    if (this.callback) this.callback(data);
     // Called when there's incoming data on the websocket for this channel
-  }
+  },
+
+  follow(workspaceId, callback) {
+    this.perform('follow', { workspaceId })
+    this.callback = callback;
+  },
+
+  unfollow(workspaceId) {
+    this.perform('unfollow', { workspaceId })
+  },
+
+  broadcast(action) {
+    console.log("broadcast:");
+    console.log(action);
+    this.perform('broadcast', action)
+  },
 });
 
 export default MiradorStateChannel;

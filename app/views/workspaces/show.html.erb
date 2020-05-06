@@ -31,6 +31,7 @@
 
   var config = JSON.parse(document.querySelector('#mirador-state').innerText || "{}");
   var overwriteMerge = (destinationArray, sourceArray, options) => sourceArray;
+  config.channels = { workspaceId: <%= @workspace.id %>};
   config.config = deepmerge(miradorInstance.store.getState().config, config.config, { arrayMerge: overwriteMerge });
 
   miradorInstance.store.dispatch(miradorInstance.actions.importMiradorState(config));
